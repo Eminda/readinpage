@@ -1,0 +1,37 @@
+<form #f="ngForm" class="col-md-12" style="padding-top: 20px;padding-left: 50px">
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">Account Email</div>
+        <div class="col-md-8"><input class="col-md-6" name="email" ngModel/></div>
+    </div>
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">Account Password</div>
+        <div class="col-md-8"><input class="col-md-6" name="password" ngModel/></div>
+    </div>
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">Job Name</div>
+        <div class="col-md-8"><input class="col-md-6" name="jobName" ngModel/></div>
+    </div>
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">Description</div>
+        <div class="col-md-8"><input class="col-md-6" name="description" ngModel/></div>
+    </div>
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">URL List</div>
+        <div class="col-md-8"><textarea class="col-md-6" name="urlList" rows="4" ngModel></textarea></div>
+    </div>
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">Filter List</div>
+        <div class="col-md-8"><textarea class="col-md-6" name="filterList" rows="4" ngModel></textarea></div>
+    </div>
+    <div class="row" style="padding-top: 10px">
+        <div class="col-md-2">
+            &nbsp;
+        </div>
+        <div class="col-md-8">
+            <div class="col-md-6" style="text-align: right;padding: 0px">
+                <button class="btn btn-primary" type="button" (click)="submitOrder(f.value)">Submit Job</button>
+            </div>
+        </div>
+
+    </div>
+</form>

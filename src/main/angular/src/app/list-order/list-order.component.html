@@ -1,0 +1,33 @@
+<div class="row col-md-12" style="float: right">
+  <div class="col-md-11">&nbsp;</div>
+  <button (click)="reload()" class="btn btn-primary btn-large">Reload</button>
+</div>
+<br>
+<div class="row" style="margin: 20px">
+  <table class="table table-striped">
+    <thead>
+    <tr style="width: 100%">
+      <th style="width: 10%">ID</th>
+      <th style="width: 10%">Name</th>
+      <th style="width: 10%">Description</th>
+      <th style="width: 10%">Status</th>
+      <th style="width: 20%">URLS</th>
+      <th style="width: 20%">Filters</th>
+      <th style="width: 10%">Completed Count</th>
+      <th style="width: 10%">Download Here</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let job of data">
+      <td>{{job.id}}</td>
+      <td>{{job.name}}</td>
+      <td>{{job.description}}</td>
+      <td>{{job.status}}</td>
+      <td>{{job.domainList}}</td>
+      <td>{{job.filterList}}</td>
+      <td>{{job.completedDomains}}</td>
+      <td><a href="{{job.xlsLink}}">download</a> </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
