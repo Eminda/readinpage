@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface JobStatusRepo extends CrudRepository<JobStatus, Integer> {
 
-    JobStatus findByIdValue(Integer id);
+    JobStatus findByJobStatusID(Integer id);
 
-    List<JobStatus> findTop100ByOrderByIdValueDesc();
+    List<JobStatus> findTop100ByOrderByJobStatusIDDesc();
 }

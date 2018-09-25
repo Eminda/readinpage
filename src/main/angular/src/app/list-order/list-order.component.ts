@@ -15,7 +15,7 @@ export class ListOrderComponent implements OnInit {
     }
 
     reload() {
-        this.http.get("/scrape/retrieve").subscribe(data=>{
+        this.http.get("/api/scrape/retrieve").subscribe(data=>{
             console.log(data);
             this.data=data;
         })

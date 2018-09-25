@@ -5,15 +5,17 @@ import ethirium.eth.dto.JobStatusDto;
 import ethirium.eth.utils.DomainConstatns.Status;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.List;
 
 @Entity
 @Table(name = "T_JOB_STATUS")
-public class JobStatus {
+public class JobStatus implements Serializable{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
-    private Integer idValue;
+    @Column(name = "JOB_STATUS_ID")
+    private Integer jobStatusID;
 
     @Column(name = "NAME")
     private String name;
@@ -43,10 +45,22 @@ public class JobStatus {
     @Column(name = "FILTER_LIST",length = 10000)
     private String filterList;
 
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(name = "JOB_STATUS_ID",referencedColumnName = "JOB_STATUS_ID")
+    private List<Company> companies;
+
     public JobStatus() {
     }
 
-    public JobStatus(JobDto jobDto,Integer domainCount){
+    public List<Company> getCompanies() {
+        return companies;
+    }
+
+    public void setCompanies(List<Company> companies) {
+        this.companies = companies;
+    }
+
+    public JobStatus(JobDto jobDto, Integer domainCount){
         this.name=jobDto.getJobName();
         this.description=jobDto.getDescription();
         this.status=Status.INPROGRESS;
@@ -59,7 +73,7 @@ public class JobStatus {
     public JobStatusDto getJobStatusDto(){
         JobStatusDto jobStatusDto=new JobStatusDto();
 
-        jobStatusDto.setId(this.idValue);
+        jobStatusDto.setId(this.jobStatusID);
         jobStatusDto.setName(this.name);
         jobStatusDto.setDescription(this.description);
         jobStatusDto.setStatus(this.status);
@@ -68,16 +82,17 @@ public class JobStatus {
         jobStatusDto.setFilterList(this.filterList);
         jobStatusDto.setTotalDomains(this.totalDomainCount);
         jobStatusDto.setCompletedDomains(this.completedDomainCount);
+        jobStatusDto.setLastCompletedDomain(this.currentDomain);
 
         return jobStatusDto;
     }
 
-    public Integer getIdValue() {
-        return idValue;
+    public Integer getJobStatusID() {
+        return jobStatusID;
     }
 
-    public void setIdValue(Integer idValue) {
-        this.idValue = idValue;
+    public void setJobStatusID(Integer jobStatusID) {
+        this.jobStatusID = jobStatusID;
     }
 
     public String getName() {
@@ -159,7 +174,7 @@ public class JobStatus {
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("JobStatus{");
-        sb.append("idValue=").append(idValue);
+        sb.append("jobStatusID=").append(jobStatusID);
         sb.append(", name='").append(name).append('\'');
         sb.append(", description='").append(description).append('\'');
         sb.append(", status=").append(status);

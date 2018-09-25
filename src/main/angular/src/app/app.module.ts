@@ -7,6 +7,8 @@ import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {SaveOrderComponent} from './save-order/save-order.component';
 import {ListOrderComponent} from './list-order/list-order.component';
+import {ToastrModule} from "ngx-toastr";
+import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 
 @NgModule({
     declarations: [
@@ -19,6 +21,8 @@ import {ListOrderComponent} from './list-order/list-order.component';
         routing,
         ReactiveFormsModule,
         FormsModule,
+        BrowserAnimationsModule,
+        ToastrModule.forRoot(),
         HttpClientModule
     ],
     providers: [],

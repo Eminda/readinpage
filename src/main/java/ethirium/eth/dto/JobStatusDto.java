@@ -14,8 +14,17 @@ public class JobStatusDto implements Serializable{
     private String xlsLink;
     private Integer totalDomains;
     private Integer completedDomains;
+    private String lastCompletedDomain;
     private String domainList;
     private String filterList;
+
+    public String getLastCompletedDomain() {
+        return lastCompletedDomain;
+    }
+
+    public void setLastCompletedDomain(String lastCompletedDomain) {
+        this.lastCompletedDomain = lastCompletedDomain;
+    }
 
     public Integer getTotalDomains() {
         return totalDomains;
@@ -99,6 +108,7 @@ public class JobStatusDto implements Serializable{
         sb.append(", xlsLink='").append(xlsLink).append('\'');
         sb.append(", totalDomains=").append(totalDomains);
         sb.append(", completedDomains=").append(completedDomains);
+        sb.append(", lastCompletedDomain='").append(lastCompletedDomain).append('\'');
         sb.append(", domainList='").append(domainList).append('\'');
         sb.append(", filterList='").append(filterList).append('\'');
         sb.append('}');

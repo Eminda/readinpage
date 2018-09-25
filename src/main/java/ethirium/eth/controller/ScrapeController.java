@@ -1,12 +1,11 @@
 package ethirium.eth.controller;
 
+import ethirium.eth.dto.CompanyDto;
 import ethirium.eth.dto.JobDto;
 import ethirium.eth.dto.JobStatusDto;
-import ethirium.eth.model.JobStatus;
 import ethirium.eth.service.CrawlerService;
 import ethirium.eth.service.ScrapeService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -17,7 +16,6 @@ import javax.annotation.Resource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -41,6 +39,11 @@ public class ScrapeController {
     @RequestMapping(value = "/retrieve",method = RequestMethod.GET)
     public List<JobStatusDto> retrieve(){
         return scrapeService.getLastJobsStatus();
+    }
+
+    @RequestMapping(value = "/retrieve-company-list/{id}",method = RequestMethod.GET)
+    public List<CompanyDto> retrieveCompanyList(@PathVariable("id") String jobStatusID){
+        return scrapeService.getCompanyList(Integer.parseInt(jobStatusID));
     }
 
     @RequestMapping(path = "/retrieve-xls/{name}", method = RequestMethod.GET)
