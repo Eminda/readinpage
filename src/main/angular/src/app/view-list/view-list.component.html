@@ -1,0 +1,32 @@
+<div class="row col-md-12" style="float: right">
+    <div class="col-md-10">&nbsp;</div>
+    <button (click)="reload()" class="btn btn-primary btn-large">Reload</button>
+    <button (click)="download(id)"  class="btn btn-primary btn-large" style="margin-left: 10px;margin-right: 10px">Download</button>
+</div>
+<a class="download-zip-link" #downloadZipLink hidden></a>
+<br>
+<div class="row" style="margin: 20px">
+    <table class="table table-striped">
+        <thead>
+        <tr style="width: 100%">
+            <th style="width: 16.6666666667%">URL</th>
+            <th style="width: 16.6666666667%">Company</th>
+            <th style="width: 25%">Name</th>
+            <th style="width: 16.6666666667%">Email</th>
+            <th style="width: 25%">Role</th>
+        </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <div *ngFor="let company of data" class="row">
+        <div *ngFor="let contact of company.contactDtoList" style="border-bottom: 1px solid black" class="row col-md-12">
+            <div class="col-md-2">{{company.urlSearched}}&nbsp;</div>
+            <div class="col-md-2">{{company.companyName}}&nbsp;</div>
+            <div class="col-md-3">{{contact.name}}&nbsp;</div>
+            <div class="col-md-2">{{contact.email}}&nbsp;</div>
+            <div class="col-md-3">{{contact.role}}&nbsp;</div>
+        </div>
+    </div>
+
+</div>

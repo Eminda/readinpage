@@ -15,6 +15,7 @@
         <div class="col-md-2">Description</div>
         <div class="col-md-8"><input class="col-md-6" name="description" [(ngModel)]="description"/></div>
     </div>
+    <input type="file" class="upload" (change)="changeListener($event.target.files)">
     <div class="row" style="padding-top: 10px">
         <div class="col-md-2">URL List</div>
         <div class="col-md-8"><textarea class="col-md-6" name="urlList" rows="4" [(ngModel)]="urlList"></textarea></div>

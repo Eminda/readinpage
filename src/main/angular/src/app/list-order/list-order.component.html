@@ -3,34 +3,38 @@
   <button (click)="reload()" class="btn btn-primary btn-large">Reload</button>
 </div>
 <br>
-<div class="row" style="margin: 20px">
+
+<a class="download-zip-link" #downloadZipLink hidden></a>
+<div class="row" style="margin: 20px;overflow: scroll">
   <table class="table table-striped">
     <thead>
-    <tr style="width: 100%">
-      <th style="width: 10%">ID</th>
-      <th style="width: 10%">Name</th>
-      <th style="width: 10%">Description</th>
-      <th style="width: 10%">Status</th>
-      <th style="width: 20%">URLS</th>
-      <th style="width: 20%">Filters</th>
-      <th style="width: 10%">Total URL Count</th>
-      <th style="width: 10%">Completed Count</th>
-      <th style="width: 10%">Last Completed URL</th>
-      <th style="width: 10%">Download Here</th>
+    <tr style="width: 100%;;overflow: hidden">
+      <th style="width: 5%;overflow: hidden">ID</th>
+      <th style="width: 10%;overflow: hidden">Name</th>
+      <th style="width: 10%;overflow: hidden">Description</th>
+      <th style="width: 10%;overflow: hidden">Status</th>
+      <th style="width: 15%;overflow: hidden">URLS</th>
+      <th style="width: 15%;overflow: hidden">Filters</th>
+      <th style="width: 10%;overflow: hidden">Total URL Count</th>
+      <th style="width: 10%;overflow: hidden">Completed Count</th>
+      <th style="width: 10%;overflow: hidden">Last Completed URL</th>
+      <th style="width: 10%;overflow: hidden">Download Here</th>
+      <th style="width: 5%;overflow: hidden"></th>
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let job of data">
-      <td>{{job.id}}</td>
-      <td>{{job.name}}</td>
-      <td>{{job.description}}</td>
-      <td>{{job.status}}</td>
-      <td>{{job.domainList}}</td>
-      <td>{{job.filterList}}</td>
-      <td>{{job.totalDomains}}</td>
-      <td>{{job.completedDomains}}</td>
-      <td>{{job.lastCompletedDomain}}</td>
-      <td><a href="{{job.xlsLink}}">download</a> </td>
+    <tr style="width: 100%;;overflow: hidden" *ngFor="let job of data">
+      <td style="width: 5%;overflow: hidden">{{job.id}}</td>
+      <td style="width: 10%;overflow: hidden">{{job.name}}</td>
+      <td style="width: 10%;overflow: hidden">{{job.description}}</td>
+      <td style="width: 10%;overflow: hidden">{{job.status}}</td>
+      <td style="width: 15%;overflow: hidden">{{getShortList(job.domainList)}}</td>
+      <td style="width: 15%;overflow: hidden">{{getShortList(job.filterList)}}</td>
+      <td style="width: 10%;overflow: hidden">{{job.totalDomains}}</td>
+      <td style="width: 10%;overflow: hidden">{{job.completedDomains}}</td>
+      <td style="width: 10%;overflow: hidden">{{job.lastCompletedDomain}}</td>
+      <td style="width: 10%;overflow: hidden"><button style="cursor: pointer" (click)="download(job.id)">download</button> </td>
+      <td style="width: 5%;overflow: hidden"><button type="button" style="cursor: pointer" (click)="viewList(job.id,job.xlsLink)">View</button> </td>
     </tr>
     </tbody>
   </table>
