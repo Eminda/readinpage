@@ -1,0 +1,12 @@
+<div class="row" style="margin-left: 50px">
+  <div class="col-md-3">
+    <a class="btn" [routerLink]="'save-order'">Upload</a>
+    <a class="btn" [routerLink]="'list-order'">Download list</a>
+    <a class="btn" [routerLink]="'change-user'">Change Password</a>
+  </div>
+  <div class="col-md-9" style="text-align: right;padding-right: 50px;padding-top: 10px">
+    <a [routerLink]="'/login'" (click)="clearUser()">Log out</a>
+  </div>
+</div>
+
+<router-outlet></router-outlet>

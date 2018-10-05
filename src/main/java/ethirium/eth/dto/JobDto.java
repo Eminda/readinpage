@@ -10,8 +10,17 @@ public class JobDto implements Serializable{
     private String description;
     private String email;
     private String password;
+    private boolean retrieveEmailOnly;
     private String urlList;
     private String filterList;
+
+    public boolean isRetrieveEmailOnly() {
+        return retrieveEmailOnly;
+    }
+
+    public void setRetrieveEmailOnly(boolean retrieveEmailOnly) {
+        this.retrieveEmailOnly = retrieveEmailOnly;
+    }
 
     public String getUrlList() {
         return urlList;
@@ -80,6 +89,7 @@ public class JobDto implements Serializable{
         sb.append(", description='").append(description).append('\'');
         sb.append(", email='").append(email).append('\'');
         sb.append(", password='").append(password).append('\'');
+        sb.append(", retrieveEmailOnly=").append(retrieveEmailOnly);
         sb.append(", urlList='").append(urlList).append('\'');
         sb.append(", filterList='").append(filterList).append('\'');
         sb.append('}');

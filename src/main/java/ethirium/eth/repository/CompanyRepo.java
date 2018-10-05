@@ -11,7 +11,9 @@ public interface CompanyRepo extends CrudRepository<Company, Integer> {
 
     Company findByCompanyID(Integer companyID);
 
-    List<Company> findAllByJobStatusIDAndShow(Integer jobStatusID,boolean show);
+    List<Company> findTop1000ByJobStatusIDAndShowOrderByCompanyIDDesc(Integer jobStatusID, boolean show);
+
+    List<Company> findTop1000ByJobStatusIDAndShowAndCompanyIDGreaterThanOrderByCompanyID(Integer jobStatusID, boolean show,Integer greaterThan);
 
     List<Company> findAllByUrlSearchedAndJobStatusID(String url,Integer jobStatusID);
 

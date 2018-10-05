@@ -11,13 +11,18 @@ import ethirium.eth.repository.ContactRepo;
 import ethirium.eth.repository.JobStatusRepo;
 import ethirium.eth.utils.DomainConstatns.Status;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFSheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -50,8 +55,15 @@ public class ScrapeService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markJobCompleted(Integer jobStatusID) {
         JobStatus jobStatus = jobStatusRepo.findByJobStatusID(jobStatusID);
-
+        jobStatus.setCompletedDomainCount(jobStatus.getTotalDomainCount());
         jobStatus.setStatus(Status.COMPLETE);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void markJobStopped(Integer jobStatusID) {
+        JobStatus jobStatus = jobStatusRepo.findByJobStatusID(jobStatusID);
+
+        jobStatus.setStatus(Status.STOPPED);
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
@@ -61,7 +73,7 @@ public class ScrapeService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public List<CompanyDto> getCompanyList(Integer jobStatusID) {
-        return companyRepo.findAllByJobStatusIDAndShow(jobStatusID,true).stream().map(Company::getCompanyDto).collect(Collectors.toList());
+        return companyRepo.findTop1000ByJobStatusIDAndShowOrderByCompanyIDDesc(jobStatusID,true).stream().map(Company::getCompanyDto).collect(Collectors.toList());
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
@@ -87,8 +99,8 @@ public class ScrapeService {
     }
 
     @Transactional(propagation = Propagation.SUPPORTS)
-    public synchronized void createExcelDataSheet(Integer jobStatusID,String name){
-        List<Company> data = companyRepo.findAllByJobStatusIDAndShow(jobStatusID, true);
+    public synchronized void createExcelDataSheet(Integer jobStatusID,String name) throws IOException {
+        List<Company> data = companyRepo.findTop1000ByJobStatusIDAndShowAndCompanyIDGreaterThanOrderByCompanyID(jobStatusID, true,0);
         Workbook workbook = new XSSFWorkbook();
 
         CreationHelper createHelper = workbook.getCreationHelper();
@@ -113,21 +125,6 @@ public class ScrapeService {
             cell.setCellValue(columns[i]);
             cell.setCellStyle(headerCellStyle);
         }
-
-        int rowNum=1;
-        for(Company company:data){
-            for(Contact contact:company.getContacts()){
-                Row row=sheet.createRow(rowNum++);
-                row.createCell(0).setCellValue(company.getUrlSearched());
-                row.createCell(1).setCellValue(company.getName());
-                row.createCell(2).setCellValue(contact.getName());
-                row.createCell(3).setCellValue(contact.getEmail());
-                row.createCell(4).setCellValue(contact.getRole());
-            }
-        }
-        for (int i = 0; i < columns.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
         FileOutputStream fileOut=null;
         try {
             fileOut = new FileOutputStream("./content/"+name);
@@ -140,5 +137,42 @@ public class ScrapeService {
                 fileOut.close();
             }catch (Exception ed){}
         }
+
+        FileInputStream inputStream = new FileInputStream("./content/"+name);
+        XSSFWorkbook wb_template = new XSSFWorkbook(inputStream);
+        inputStream.close();
+
+        SXSSFWorkbook wb = new SXSSFWorkbook(wb_template);
+        wb.setCompressTempFiles(true);
+
+        SXSSFSheet sh = (SXSSFSheet) wb.getSheetAt(0);
+        sh.setRandomAccessWindowSize(100);
+
+        int rowNum=1;
+        while (true) {
+            for (Company company : data) {
+                for (Contact contact : company.getContacts()) {
+                    Row row = sh.createRow(rowNum++);
+                    row.createCell(0).setCellValue(company.getUrlSearched());
+                    row.createCell(1).setCellValue(company.getName());
+                    row.createCell(2).setCellValue(contact.getName());
+                    row.createCell(3).setCellValue(contact.getEmail());
+                    row.createCell(4).setCellValue(contact.getRole());
+                }
+            }
+            if(data.size()>=1000){
+                data=companyRepo.findTop1000ByJobStatusIDAndShowAndCompanyIDGreaterThanOrderByCompanyID(jobStatusID,true,data.get(data.size()-1).getCompanyID());
+            }else{
+                break;
+            }
+        }
+
+//        for (int i = 0; i < columns.length; i++) {
+//            sh.autoSizeColumn(i);
+//        }
+
+        FileOutputStream out = new FileOutputStream("./content/temp_"+name);
+        wb.write(out);
+        out.close();
     }
 }

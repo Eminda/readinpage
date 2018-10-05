@@ -1,0 +1,39 @@
+<h2 style="padding-left: 10px">Change User Password</h2>
+
+<div class="row" style="padding-top: 20px;padding-left: 50px">
+  <div class="row col-md-12">
+    <div class="col-md-2">
+      Current Password
+    </div>
+    :
+    <div class="col-md-3">
+      <input class="col-md-12" type="password" [(ngModel)]="user.password"/>
+    </div>
+  </div>
+  <div class="row col-md-12" style="padding-top: 10px">
+    <div class="col-md-2">
+      New Password
+    </div>
+    :
+    <div class="col-md-3">
+      <input class="col-md-12" type="password" [(ngModel)]="user.newPassword"/>
+    </div>
+  </div>
+  <div class="row col-md-12" style="padding-top: 10px">
+    <div class="col-md-2">
+      Repeat Password
+    </div>
+    :
+    <div class="col-md-3">
+      <input class="col-md-12" type="password" [(ngModel)]="repeatPass"/>
+    </div>
+  </div>
+  <div class="row col-md-12" style="padding-top: 10px">
+    <div class="col-md-2">
+      &nbsp;
+    </div>
+    :
+    <div class="col-md-3" style="text-align: right">
+      <input type="button" value="change" (click)="changePassword()" class="col-md-4"/>
+    </div>
+</div>

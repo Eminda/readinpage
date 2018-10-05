@@ -15,6 +15,7 @@ export class SaveOrderComponent implements OnInit {
     description;
     urlList;
     filterList;
+    retrieveEmailOnly=false;
 
     constructor(private http: HttpClient, private toaster: ToastrService) {
         this.clearFields();
@@ -30,13 +31,16 @@ export class SaveOrderComponent implements OnInit {
         this.description = '';
         this.urlList = '';
         this.filterList = '';
+        this.retrieveEmailOnly=false;
     }
 
     submitOrder(order) {
         this.http.post(SETTING.HTTP + '/api/scrape/submit', order).subscribe(data => {
-            if (data === true) {
+            if (parseInt(""+data,10)>0) {
                 this.toaster.success("Job was successfully submitted");
                 // this.clearFields();
+            }else{
+                this.toaster.error("Only one job is allowed to work at once");
             }
         });
     }

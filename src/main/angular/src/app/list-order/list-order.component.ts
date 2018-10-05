@@ -36,7 +36,7 @@ export class ListOrderComponent implements OnInit {
     viewList(id, xlsLink) {
         this.http.get(SETTING.HTTP + "/api/scrape/retrieve-company-list/" + id).subscribe(data => {
             this.orderService.setData(data, id, xlsLink);
-            this.router.navigate(['view-order']);
+            this.router.navigate(['main','view-order']);
         })
     }
 

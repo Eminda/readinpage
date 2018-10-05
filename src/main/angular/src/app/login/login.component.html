@@ -1,0 +1,29 @@
+<div class="row" style="padding-top: 300px">
+    <div class="col-md-4">&nbsp;</div>
+    <div class="col-md-4">
+        <div class="row col-md-12">
+            <div class="col-md-5">
+                <span style="font-size: 22px">User Name : </span>
+            </div>
+            <div class="col-md-7">
+                <input class="col-md-12" [(ngModel)]="user.userName" />
+            </div>
+        </div>
+        <div class="row col-md-12" style="padding-top: 10px">
+            <div class="col-md-5">
+                <span style="font-size: 22px">Password : </span>
+            </div>
+            <div class="col-md-7">
+                <input class="col-md-12" [(ngModel)]="user.password" />
+            </div>
+        </div>
+        <div class="row col-md-12" style="padding-top: 20px">
+            <div class="col-md-5">
+                &nbsp;
+            </div>
+            <div class="col-md-7" style="text-align: right" >
+                <button class="col-md-5" (click)="login()">Log In</button>
+            </div>
+        </div>
+    </div>
+</div>

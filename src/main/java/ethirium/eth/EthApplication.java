@@ -18,6 +18,5 @@ public class EthApplication extends SpringBootServletInitializer{
 
 	public static void main(String[] args) throws InterruptedException, IOException {
 		SpringApplication.run(EthApplication.class, args);
-//		Crawler.initialise();
 	}
 }

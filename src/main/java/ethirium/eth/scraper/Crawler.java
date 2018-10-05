@@ -4,6 +4,7 @@ import ethirium.eth.controller.Ethirum;
 import ethirium.eth.dto.CompanyDto;
 import ethirium.eth.dto.ContactDto;
 import ethirium.eth.dto.JobDto;
+import ethirium.eth.service.CrawlerService;
 import ethirium.eth.service.ScrapeService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -43,27 +44,18 @@ public class Crawler {
 
     private boolean jobCompletionMarked = false;
 
-    public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID) throws InterruptedException, IOException {
+    public static boolean stop=false;
+
+    public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID, boolean getEmailOnly) throws InterruptedException, IOException {
         System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
         FirefoxOptions options = new FirefoxOptions();
         options.setHeadless(true);
 
-//        new File("./content").mkdir();
-//        File fl = new File("./content/" + jobID + "_scrape.xlsx");
-//        FileOutputStream fileOut = new FileOutputStream("./content/" + jobID + "_scrape.xlsx");
-////        fl.createNewFile();
-//
-//        FileInputStream fsIP = new FileInputStream(fl);
-//        Workbook workbook = new XSSFWorkbook(); // new HSSFWorkbook() for generating `.xls` file
-//        workbook.write(fileOut);
-        /* CreationHelper helps us create instances of various things like DataFormat,
-           Hyperlink, RichTextString etc, in a format (HSSF, XSSF) independent way */
-//        CreationHelper createHelper = workbook.getCreationHelper();
         jobCompletionMarked = false;
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                FirefoxDriver driver = new FirefoxDriver(options);
+                FirefoxDriver driver = new FirefoxDriver();
                 driver.get("https://app.snov.io/login");
 
                 try {
@@ -78,12 +70,13 @@ public class Crawler {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-//        Sheet sheet = createSheet("contacts", workbook);
                     int rowNum = 1;
 
-//        String []urls={"matholdingsinc.com","pottyboss.com"};
                     String url = null;
-                    while ((url = getLinkItem(urls)) != null) {
+                    L0:while ((url = getLinkItem(urls)) != null) {
+                        if(stop){
+                            break L0;
+                        }
                         driver.get("https://app.snov.io/domain-search/" + url);
                         try {
                             Thread.sleep(3000);
@@ -104,6 +97,9 @@ public class Crawler {
                         if (paths.size() > 0) {
                             for (String path : paths) {
                                 driver.get(path);
+                                if(stop){
+                                    break L0;
+                                }
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException e) {
@@ -142,6 +138,9 @@ public class Crawler {
                                         }
                                         int index = 1;
                                         for (WebElement tr : trs) {
+                                            if(stop){
+                                                break L0;
+                                            }
                                             ContactDto contactDto = new ContactDto();
 //                                    System.out.println(tr.getText());
                                             List<WebElement> tds = tr.findElements(By.tagName("td"));
@@ -194,7 +193,7 @@ public class Crawler {
                                 }
                             }
                         }
-                        if (contactExtracted < 5 || paths.size() == 0) {
+                        if ((contactExtracted < 5 || paths.size() == 0) && getEmailOnly) {
                             driver.get("https://app.snov.io/domain-search/" + url);
                             try {
                                 Thread.sleep(3000);
@@ -211,6 +210,9 @@ public class Crawler {
                             Integer companyID = scrapeService.createCompany(companyDto, jobID);
                             L1:
                             while (true) {
+                                if(stop){
+                                    break L1;
+                                }
                                 trs = driver.findElements(By.tagName("tr"));
                                 int k = 0;
                                 for (WebElement tr : trs) {
@@ -230,6 +232,9 @@ public class Crawler {
 
                                     List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div[3]/div/div[1]/ul/li"));
                                     for (WebElement element : nextMightBe) {
+                                        if(stop){
+                                            break L1;
+                                        }
                                         if (element.getText().toLowerCase().contains("next")) {
                                             actions.moveToElement(element).click().perform();
 //                                System.out.println(urls.get(i) + ": page" + (++page));
@@ -249,13 +254,19 @@ public class Crawler {
 
                         scrapeService.saveCurrentStatus(url, jobID);
                     }
-                    if (!jobCompletionMarked) {
+                    if (!jobCompletionMarked && !stop) {
                         scrapeService.markJobCompleted(jobID);
                         jobCompletionMarked = true;
+                    }else if(stop){
+                        scrapeService.markJobStopped(jobID);
                     }
+                    stop=false;
                     driver.close();
                 }catch (Exception e){
                     driver.close();
+                }finally {
+                    stop=false;
+                    CrawlerService.working=false;
                 }
             }
         };

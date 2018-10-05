@@ -29,60 +29,80 @@ public class CrawlerService {
 
     private static int count=0;
 
+    public static boolean working=false;
+    private static Object lock=new Object();
+
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Integer saveAndStartJob(JobDto jobDto) {
-        String urls[] = jobDto.getUrlList().split(",");
-        List<String> urlList = new ArrayList<>();
-        StringBuffer formattedUrlList = new StringBuffer("");
-        for (String url : urls) {
-            String urlFormatted = url.trim();
-            if (urlFormatted.length() > 0 && url.contains(".")) {
-                urlList.add(urlFormatted);
-                formattedUrlList.append(urlFormatted).append(",");
-            }
-        }
-        if (formattedUrlList.length() > 0) {
-            jobDto.setUrlList(formattedUrlList.toString().substring(0, formattedUrlList.length() - 1));
-        }
+        if(!working) {
+            synchronized (lock) {
+                if(!working) {
+                    working=true;
+                    Crawler.stop=false;
+                    String urls[] = jobDto.getUrlList().split(",");
+                    List<String> urlList = new ArrayList<>();
+                    StringBuffer formattedUrlList = new StringBuffer("");
+                    for (String url : urls) {
+                        String urlFormatted = url.trim();
+                        if (urlFormatted.length() > 0 && url.contains(".")) {
+                            urlList.add(urlFormatted);
+                            formattedUrlList.append(urlFormatted).append(",");
+                        }
+                    }
+                    if (formattedUrlList.length() > 0) {
+                        jobDto.setUrlList(formattedUrlList.toString().substring(0, formattedUrlList.length() - 1));
+                    }
 
-        String filters[] = jobDto.getFilterList().split(",");
-        List<String> filterList = new ArrayList<>();
-        StringBuffer filterListFormatted = new StringBuffer("");
-        for (String filter : filters) {
-            String filterFormatted = filter.trim().toLowerCase();
-            if (filterFormatted.length() > 0) {
-                filterList.add(filterFormatted);
-                filterListFormatted.append(filterFormatted).append(",");
-            }
-        }
-        if (filterListFormatted.length() > 0) {
-            jobDto.setFilterList(filterListFormatted.toString().substring(0, filterListFormatted.length() - 1));
-        }
-        //Remove in production
+                    String filters[] = jobDto.getFilterList().split(",");
+                    List<String> filterList = new ArrayList<>();
+                    StringBuffer filterListFormatted = new StringBuffer("");
+                    for (String filter : filters) {
+                        String filterFormatted = filter.trim().toLowerCase();
+                        if (filterFormatted.length() > 0) {
+                            filterList.add(filterFormatted);
+                            filterListFormatted.append(filterFormatted).append(",");
+                        }
+                    }
+                    if (filterListFormatted.length() > 0) {
+                        jobDto.setFilterList(filterListFormatted.toString().substring(0, filterListFormatted.length() - 1));
+                    }
+                    //Remove in production
 //        if (urlList.size() > 2 || filterList.size() > 2 || ++count>10) {
 //            throw new RuntimeException("Too many variations.");
 //        }
-        JobStatus jobStatus = new JobStatus(jobDto, urlList.size());
+                    JobStatus jobStatus = new JobStatus(jobDto, urlList.size());
 
-        jobStatusRepo.save(jobStatus);
+                    jobStatusRepo.save(jobStatus);
 
 
-        Runnable r = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    crawler.scrape(jobDto, urlList, filterList, jobStatus.getJobStatusID());
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                    Runnable r = new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                crawler.scrape(jobDto, urlList, filterList, jobStatus.getJobStatusID(), jobDto.isRetrieveEmailOnly());
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                                working = false;
+                                scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                            }
+                        }
+                    };
+
+                    jobStatus.setXlsLink(xlsPath + "/" + jobStatus.getJobStatusID() + "_scrape.xlsx");
+
+                    new Thread(r).start();
+
+                    return jobStatus.getJobStatusID();
+                }else {
+                    return -1;
                 }
             }
-        };
+        }else{
+            return -1;
+        }
+    }
 
-        jobStatus.setXlsLink(xlsPath + "/" + jobStatus.getJobStatusID() + "_scrape.xlsx");
-
-        new Thread(r).start();
-
-        return jobStatus.getJobStatusID();
+    public void stopJob(){
+        Crawler.stop=true;
     }
 }

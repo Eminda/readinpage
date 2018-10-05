@@ -12,12 +12,19 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
 import { ViewListComponent } from './view-list/view-list.component';
 import {OrderService} from "./order.service";
 import {WebStorageModule} from 'ngx-store';
+import { LoginComponent } from './login/login.component';
+import { MainComponent } from './main/main.component';
+import { UserChangeComponent } from './user-change/user-change.component';
+import {UserService} from "./user.service";
 @NgModule({
     declarations: [
         AppComponent,
         SaveOrderComponent,
         ListOrderComponent,
-        ViewListComponent
+        ViewListComponent,
+        LoginComponent,
+        MainComponent,
+        UserChangeComponent
     ],
     imports: [
         BrowserModule,
@@ -29,7 +36,7 @@ import {WebStorageModule} from 'ngx-store';
         HttpClientModule,
         WebStorageModule
     ],
-    providers: [OrderService],
+    providers: [OrderService,UserService],
     bootstrap: [AppComponent]
 })
 export class AppModule {
