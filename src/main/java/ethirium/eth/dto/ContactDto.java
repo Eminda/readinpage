@@ -31,11 +31,10 @@ public class ContactDto {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("ContactDto{");
-        sb.append("name='").append(name).append('\'');
-        sb.append(", email='").append(email).append('\'');
-        sb.append(", role='").append(role).append('\'');
-        sb.append('}');
+        final StringBuffer sb = new StringBuffer("");
+        sb.append("\""+name+"\"").append(',');
+        sb.append("\""+email+"\"").append(',');
+        sb.append("\""+role+"\"").append('\n');
         return sb.toString();
     }
 }

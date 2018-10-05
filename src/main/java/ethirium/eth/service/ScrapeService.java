@@ -19,10 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -101,63 +101,26 @@ public class ScrapeService {
     @Transactional(propagation = Propagation.SUPPORTS)
     public synchronized void createExcelDataSheet(Integer jobStatusID,String name) throws IOException {
         List<Company> data = companyRepo.findTop1000ByJobStatusIDAndShowAndCompanyIDGreaterThanOrderByCompanyID(jobStatusID, true,0);
-        Workbook workbook = new XSSFWorkbook();
 
-        CreationHelper createHelper = workbook.getCreationHelper();
-        Sheet sheet = workbook.createSheet("Contacts");
-
-        Font headerFont = workbook.createFont();
-        headerFont.setBold(true);
-        headerFont.setFontHeightInPoints((short) 14);
-        headerFont.setColor(IndexedColors.RED.getIndex());
-
-        // Create a CellStyle with the font
-        CellStyle headerCellStyle = workbook.createCellStyle();
-        headerCellStyle.setFont(headerFont);
-
-        // Create a Row
-        Row headerRow = sheet.createRow(0);
-
-        String columns[] = {"URL", "Company Name", "Name", "Email", "Role"};
-        // Create cells
-        for (int i = 0; i < columns.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columns[i]);
-            cell.setCellStyle(headerCellStyle);
-        }
-        FileOutputStream fileOut=null;
+        new File("./content").mkdir();
+        File file=new File("./content/"+jobStatusID+".csv");
+        file.delete();
+        file.createNewFile();
         try {
-            fileOut = new FileOutputStream("./content/"+name);
-            workbook.write(fileOut);
-            fileOut.close();
-            workbook.close();
-        }catch (Exception e){
-            try{
-                workbook.close();
-                fileOut.close();
-            }catch (Exception ed){}
+            Files.write(Paths.get("./content/"+jobStatusID+".csv"), new StringBuffer("NAME,EMAIL,ROLE\n").toString().getBytes(), StandardOpenOption.APPEND);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        FileInputStream inputStream = new FileInputStream("./content/"+name);
-        XSSFWorkbook wb_template = new XSSFWorkbook(inputStream);
-        inputStream.close();
-
-        SXSSFWorkbook wb = new SXSSFWorkbook(wb_template);
-        wb.setCompressTempFiles(true);
-
-        SXSSFSheet sh = (SXSSFSheet) wb.getSheetAt(0);
-        sh.setRandomAccessWindowSize(100);
 
         int rowNum=1;
         while (true) {
             for (Company company : data) {
                 for (Contact contact : company.getContacts()) {
-                    Row row = sh.createRow(rowNum++);
-                    row.createCell(0).setCellValue(company.getUrlSearched());
-                    row.createCell(1).setCellValue(company.getName());
-                    row.createCell(2).setCellValue(contact.getName());
-                    row.createCell(3).setCellValue(contact.getEmail());
-                    row.createCell(4).setCellValue(contact.getRole());
+                    try {
+                        Files.write(Paths.get("./content/"+jobStatusID+".csv"), contact.getCSV().getBytes(), StandardOpenOption.APPEND);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
             if(data.size()>=1000){
@@ -167,12 +130,5 @@ public class ScrapeService {
             }
         }
 
-//        for (int i = 0; i < columns.length; i++) {
-//            sh.autoSizeColumn(i);
-//        }
-
-        FileOutputStream out = new FileOutputStream("./content/temp_"+name);
-        wb.write(out);
-        out.close();
     }
 }

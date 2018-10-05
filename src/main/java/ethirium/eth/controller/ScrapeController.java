@@ -89,10 +89,10 @@ public class ScrapeController {
 
     @RequestMapping(path = "/retrieve-xls/{name}", method = RequestMethod.GET)
     public ResponseEntity<Resource> download(@PathVariable("name") String fileName) throws IOException {
-
-        scrapeService.createExcelDataSheet(Integer.parseInt(fileName.split("_")[0]), fileName);
+        int jobStatusID = Integer.parseInt(fileName.split("_")[0]);
+        scrapeService.createExcelDataSheet(jobStatusID, fileName);
         // ...
-        File file = new File("./content/" + fileName);
+        File file = new File("./content/" + jobStatusID+".csv");
         Path path = Paths.get(file.getAbsolutePath());
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 

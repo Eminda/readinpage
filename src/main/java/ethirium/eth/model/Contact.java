@@ -42,6 +42,14 @@ public class Contact {
         return contactDto;
     }
 
+    public String getCSV(){
+        final StringBuffer sb = new StringBuffer("");
+        sb.append("\""+name+"\"").append(',');
+        sb.append("\""+email+"\"").append(',');
+        sb.append("\""+role+"\"").append('\n');
+        return sb.toString();
+    }
+
     public Integer getCompanyID() {
         return companyID;
     }
