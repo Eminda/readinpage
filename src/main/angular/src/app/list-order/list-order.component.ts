@@ -4,6 +4,7 @@ import {SETTING} from "../SETTING";
 import {OrderService} from "../order.service";
 import {Router} from "@angular/router";
 import {ResponseContentType} from "@angular/http";
+import {ToastrService} from "ngx-toastr";
 
 @Component({
     selector: 'app-list-order',
@@ -15,8 +16,9 @@ export class ListOrderComponent implements OnInit {
 
     @ViewChild('downloadZipLink') private downloadZipLink: ElementRef;
     data;
+    stopped=-1;
 
-    constructor(private http: HttpClient, private orderService: OrderService, private router: Router) {
+    constructor(private http: HttpClient, private orderService: OrderService, private router: Router,private toaster:ToastrService) {
         this.http.get(SETTING.HTTP + "/api/scrape/retrieve").subscribe(data => {
             console.log(data);
             this.data = data;
@@ -64,6 +66,17 @@ export class ListOrderComponent implements OnInit {
         link.click();
 
         window.URL.revokeObjectURL(url);
+    }
+
+    stop(jobID){
+        this.http.get(SETTING.HTTP + '/api/scrape/stop').subscribe(data => {
+            if (data==true) {
+                this.toaster.success("Job was successfully stopped");
+                this.stopped=jobID;
+            }else{
+                this.toaster.error("Stopping failed");
+            }
+        });
     }
 
 }

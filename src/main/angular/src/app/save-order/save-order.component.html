@@ -25,7 +25,7 @@
         <div class="col-md-8"><textarea class="col-md-6" name="filterList" rows="4" [(ngModel)]="filterList"></textarea></div>
     </div>
     <div class="row" style="padding-top: 10px">
-        <div class="col-md-4"><input type="checkbox" name="retrieveEmailOnly" [(ngModel)]="retrieveEmailOnly"/> Retrieve email only contacts</div>
+        <div class="col-md-4"><input type="checkbox" name="retrieveEmailOnly" [(ngModel)]="retrieveEmailOnly"/> <span (click)="retrieveEmailOnly=!retrieveEmailOnly">Retrieve email only contacts</span></div>
     </div>
     <div class="row" style="padding-top: 10px">
         <div class="col-md-2">

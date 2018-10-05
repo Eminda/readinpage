@@ -22,6 +22,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
 public class Crawler {
@@ -46,6 +47,8 @@ public class Crawler {
 
     public static boolean stop=false;
 
+    public static AtomicInteger runCount=new AtomicInteger(-1);
+
     public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID, boolean getEmailOnly) throws InterruptedException, IOException {
         System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
         FirefoxOptions options = new FirefoxOptions();
@@ -55,7 +58,7 @@ public class Crawler {
         Runnable r = new Runnable() {
             @Override
             public void run() {
-                FirefoxDriver driver = new FirefoxDriver();
+                FirefoxDriver driver = new FirefoxDriver(options);
                 driver.get("https://app.snov.io/login");
 
                 try {
@@ -254,7 +257,8 @@ public class Crawler {
 
                         scrapeService.saveCurrentStatus(url, jobID);
                     }
-                    if (!jobCompletionMarked && !stop) {
+                    runCount.decrementAndGet();
+                    if (!jobCompletionMarked && !stop && runCount.get()==0) {
                         scrapeService.markJobCompleted(jobID);
                         jobCompletionMarked = true;
                     }else if(stop){
@@ -272,7 +276,7 @@ public class Crawler {
         };
 
         int num = urls.size() < 3? urls.size() : 3;
-
+        runCount.set(num);;
         for (int i = 0; i < num; i++) {
             new Thread(r).start();
         }

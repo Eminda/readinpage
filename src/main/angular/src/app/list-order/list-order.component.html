@@ -18,7 +18,8 @@
       <th style="width: 10%;overflow: hidden">Total URL Count</th>
       <th style="width: 10%;overflow: hidden">Completed Count</th>
       <th style="width: 10%;overflow: hidden">Last Completed URL</th>
-      <th style="width: 10%;overflow: hidden">Download Here</th>
+      <th style="width: 5%;overflow: hidden">Download Here</th>
+      <th style="width: 5%;overflow: hidden"></th>
       <th style="width: 5%;overflow: hidden"></th>
     </tr>
     </thead>
@@ -33,8 +34,9 @@
       <td style="width: 10%;overflow: hidden">{{job.totalDomains}}</td>
       <td style="width: 10%;overflow: hidden">{{job.completedDomains}}</td>
       <td style="width: 10%;overflow: hidden">{{job.lastCompletedDomain}}</td>
-      <td style="width: 10%;overflow: hidden"><button style="cursor: pointer" (click)="download(job.id)">download</button> </td>
+      <td style="width: 5%;overflow: hidden"><button style="cursor: pointer" (click)="download(job.id)">download</button> </td>
       <td style="width: 5%;overflow: hidden"><button type="button" style="cursor: pointer" (click)="viewList(job.id,job.xlsLink)">View</button> </td>
+      <td style="width: 5%;overflow: hidden"><button *ngIf="job.status==='INPROGRESS' && job.id!=stopped" type="button" style="cursor: pointer" (click)="stop(job.id)">Stop</button> </td>
     </tr>
     </tbody>
   </table>
