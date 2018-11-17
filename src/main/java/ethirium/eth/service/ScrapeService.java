@@ -100,6 +100,9 @@ public class ScrapeService {
 
     @Transactional(propagation = Propagation.SUPPORTS)
     public synchronized void createExcelDataSheet(Integer jobStatusID,String name) throws IOException {
+        if(CrawlerService.working){
+            throw new RuntimeException();
+        }
         List<Company> data = companyRepo.findTop1000ByJobStatusIDAndShowAndCompanyIDGreaterThanOrderByCompanyID(jobStatusID, true,0);
 
         new File("./content").mkdir();

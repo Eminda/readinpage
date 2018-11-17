@@ -24,7 +24,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr style="width: 100%;;overflow: hidden" *ngFor="let job of data">
+    <tr style="width: 100%;;overflow: hidden" *ngFor="let job of data;let i=index">
       <td style="width: 5%;overflow: hidden">{{job.id}}</td>
       <td style="width: 10%;overflow: hidden">{{job.name}}</td>
       <td style="width: 10%;overflow: hidden">{{job.description}}</td>
@@ -36,7 +36,7 @@
       <td style="width: 10%;overflow: hidden">{{job.lastCompletedDomain}}</td>
       <td style="width: 5%;overflow: hidden"><button style="cursor: pointer" (click)="download(job.id)">download</button> </td>
       <td style="width: 5%;overflow: hidden"><button type="button" style="cursor: pointer" (click)="viewList(job.id,job.xlsLink)">View</button> </td>
-      <td style="width: 5%;overflow: hidden"><button *ngIf="job.status==='INPROGRESS' && job.id!=stopped" type="button" style="cursor: pointer" (click)="stop(job.id)">Stop</button> </td>
+      <td style="width: 5%;overflow: hidden"><button *ngIf="job.status==='INPROGRESS' && job.id!=stopped && i==0" type="button" style="cursor: pointer" (click)="stop(job.id)">Stop</button> </td>
     </tr>
     </tbody>
   </table>

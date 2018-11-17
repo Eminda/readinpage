@@ -90,25 +90,29 @@ public class ScrapeController {
     @RequestMapping(path = "/retrieve-xls/{name}", method = RequestMethod.GET)
     public ResponseEntity<Resource> download(@PathVariable("name") String fileName) throws IOException {
         int jobStatusID = Integer.parseInt(fileName.split("_")[0]);
-        scrapeService.createExcelDataSheet(jobStatusID, fileName);
-        // ...
-        File file = new File("./content/" + jobStatusID+".csv");
-        Path path = Paths.get(file.getAbsolutePath());
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        try {
+            scrapeService.createExcelDataSheet(jobStatusID, fileName);
+            // ...
+            File file = new File("./content/" + jobStatusID + ".csv");
+            Path path = Paths.get(file.getAbsolutePath());
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
 
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
-        headers.add("Pragma", "no-cache");
-        headers.add("Expires", "0");
-        headers.add("Content-Disposition", "attachment; filename=" + fileName);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add("Cache-Control", "no-cache, no-store, must-revalidate");
+            headers.add("Pragma", "no-cache");
+            headers.add("Expires", "0");
+            headers.add("Content-Disposition", "attachment; filename=" + fileName.split("\\.")[0] + ".csv");
 
-        ResponseEntity res = ResponseEntity.ok()
-                .headers(headers)
-                .contentLength(file.length())
-                .contentType(MediaType.parseMediaType("application/octet-stream"))
-                .body(resource);
+            ResponseEntity res = ResponseEntity.ok()
+                    .headers(headers)
+                    .contentLength(file.length())
+                    .contentType(MediaType.parseMediaType("application/octet-stream"))
+                    .body(resource);
 
-        return res;
+            return res;
+        }catch (RuntimeException e0){
+            return null;
+        }
     }
 }

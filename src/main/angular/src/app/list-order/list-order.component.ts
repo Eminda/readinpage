@@ -52,7 +52,7 @@ export class ListOrderComponent implements OnInit {
 
     public async downloadResource(id: string): Promise<Blob> {
         const file =  await this.http.get<Blob>(
-            SETTING.HTTP + "/api/scrape/retrieve-xls/" + id + "_scape.xlsx",
+            SETTING.HTTP + "/api/scrape/retrieve-xls/" + id + "_scape.csv",
             {responseType: 'blob' as 'json'}).toPromise();
         return file;
     }
@@ -62,7 +62,7 @@ export class ListOrderComponent implements OnInit {
 
         const link = this.downloadZipLink.nativeElement;
         link.href = url;
-        link.download = jobID+'_scrape.xlsx';
+        link.download = jobID+'_scrape.csv';
         link.click();
 
         window.URL.revokeObjectURL(url);

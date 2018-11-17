@@ -42,6 +42,10 @@ public class Crawler {
         return null;
     }
 
+    public synchronized Integer getLinkItemSize(List urls) {
+        return urls.size();
+    }
+
     public synchronized int getListSize(List urls) {
         return urls.size();
     }
@@ -54,13 +58,13 @@ public class Crawler {
 
     public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID, boolean getEmailOnly) throws InterruptedException, IOException {
         System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
-        FirefoxOptions options = new FirefoxOptions();
-        options.setHeadless(true);
 
         jobCompletionMarked = false;
         Runnable r = new Runnable() {
             @Override
             public void run() {
+                FirefoxOptions options = new FirefoxOptions();
+                options.setHeadless(true);
                 FirefoxDriver driver = new FirefoxDriver(options);
                 driver.get("https://app.snov.io/login");
 
@@ -214,6 +218,7 @@ public class Crawler {
                             companyDto.setUrlSearched(url);
 
                             Integer companyID = scrapeService.createCompany(companyDto, jobID);
+                            int count=0;
                             L1:
                             while (true) {
                                 if(stop){
@@ -229,6 +234,8 @@ public class Crawler {
                                     ContactDto contactDto = new ContactDto();
                                     contactDto.setEmail(tr.getText());
                                     companyDto.addContact(contactDto);
+                                    count++;
+                                    if(count>=100)break L1;
 
                                     scrapeService.createContact(contactDto, companyID);
                                 }
@@ -274,6 +281,10 @@ public class Crawler {
                 }finally {
                     stop=false;
                     CrawlerService.working=false;
+                }
+                if(getLinkItemSize(urls)==0){
+                    scrapeService.markJobCompleted(jobID);
+                    jobCompletionMarked = true;
                 }
             }
         };
