@@ -11,7 +11,7 @@ const routes: Routes = [
   { path: 'main', component: MainComponent, children:[
           {path:'save-order',component:SaveOrderComponent},
           {path:'list-order',component:ListOrderComponent},
-          {path:'view-order',component:SaveOrderComponent},
+          {path:'view-order',component:ViewListComponent},
           {path:'change-user',component:UserChangeComponent},
           { path: '**', redirectTo:'put-order' }
       ]},
