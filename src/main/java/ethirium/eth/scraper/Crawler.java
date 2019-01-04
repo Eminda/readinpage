@@ -9,6 +9,7 @@ import ethirium.eth.service.ScrapeService;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
@@ -25,6 +26,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Component
@@ -52,9 +54,9 @@ public class Crawler {
 
     private boolean jobCompletionMarked = false;
 
-    public static boolean stop=false;
+    public static boolean stop = false;
 
-    public static AtomicInteger runCount=new AtomicInteger(-1);
+    public static AtomicInteger runCount = new AtomicInteger(-1);
 
     public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID, boolean getEmailOnly) throws InterruptedException, IOException {
         System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
@@ -67,7 +69,7 @@ public class Crawler {
                 options.setHeadless(true);
                 FirefoxDriver driver = new FirefoxDriver(options);
                 driver.get("https://app.snov.io/login");
-
+                String url = null;
                 try {
                     driver.findElement(By.xpath("//*[@id=\"email\"]")).sendKeys(jobDto.getEmail());
                     driver.findElement(By.xpath("//*[@id=\"password\"]")).sendKeys(jobDto.getPassword());
@@ -82,9 +84,9 @@ public class Crawler {
                     }
                     int rowNum = 1;
 
-                    String url = null;
-                    L0:while ((url = getLinkItem(urls)) != null) {
-                        if(stop){
+                    L0:
+                    while ((url = getLinkItem(urls)) != null) {
+                        if (stop) {
                             break L0;
                         }
                         driver.get("https://app.snov.io/domain-search/" + url);
@@ -93,7 +95,7 @@ public class Crawler {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        WebElement span = driver.findElementByXPath("/html/body/div[3]/div[2]/p[1]/span[2]");
+                        WebElement span = driver.findElementByXPath("/html/body/div[4]/div[2]/p[1]/span[2]");
 
                         List<WebElement> aTagList = span.findElements(By.tagName("a"));
                         List<String> paths = new ArrayList<>();
@@ -107,7 +109,7 @@ public class Crawler {
                         if (paths.size() > 0) {
                             for (String path : paths) {
                                 driver.get(path);
-                                if(stop){
+                                if (stop) {
                                     break L0;
                                 }
                                 try {
@@ -116,90 +118,105 @@ public class Crawler {
                                     e.printStackTrace();
                                 }
                                 CompanyDto companyDto;
-                                if (driver.findElement(By.xpath("/html/body/div[2]/div/div/ul/li[1]/a")).getText().contains("Personal Contacts")) {
-                                    String companyName = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[1]/div/div/div[1]/div/div/h1")).getText();
-                                    companyDto = new CompanyDto();
-
-                                    companyDto.setCompanyName(companyName.split("\n")[1]);
-                                    companyDto.setUrlSearched(url);
-                                    Integer companyID = scrapeService.createCompany(companyDto, jobID);
-                                    try {
-                                        driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div[1]/div[2]/div/div[2]/div/label[3]")).click();
-                                        Thread.sleep(6000);
-                                    } catch (Exception e) {
-                                    }
-                                    int page = 0;
-                                    L1:
-                                    while (true) {
+                                try {
+                                    if (driver.findElement(By.xpath("/html/body/div[3]/div/div/ul/li[1]/a")).getText().contains("Personal Contacts")) {
+                                        String companyName = "";
                                         try {
-                                            driver.findElement(By.xpath("/html/body/div[5]/button")).click();
-                                        } catch (Exception e) {
-                                        }
-                                        try {
-                                            Thread.sleep(4000);
-                                        } catch (InterruptedException e) {
-                                            e.printStackTrace();
-                                        }
-                                        List<WebElement> trs = null;
-                                        try {
-                                            trs = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div[1]/div[1]/table/tbody/tr"));
-                                        } catch (Exception e) {
-                                            break;
-                                        }
-                                        int index = 1;
-                                        for (WebElement tr : trs) {
-                                            if(stop){
-                                                break L0;
-                                            }
-                                            ContactDto contactDto = new ContactDto();
-//                                    System.out.println(tr.getText());
-                                            List<WebElement> tds = tr.findElements(By.tagName("td"));
-                                            contactDto.setName(tds.get(2).getText().trim());
+                                            companyName = driver.findElement(By.xpath("/html/body/div[3]/div/div/div[1]/div/div/div[1]/div/div[2]/h1")).getText().replace("Company", "");
+                                        } catch (Exception n) {
                                             try {
-                                                contactDto.setEmail(driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[4]/div/div[1]/span[2]")).getText().split(" ")[0]);
+                                                companyName = driver.findElement(By.xpath("/html/body/div[3]/div/div/div[1]/div/div/div[1]/div/div/h1")).getText().replace("Company", "");
+                                            } catch (Exception e) {
+
+                                            }
+                                        }
+                                        companyDto = new CompanyDto();
+
+                                        companyDto.setCompanyName(companyName.split("\n")[1]);
+                                        companyDto.setUrlSearched(url);
+                                        Integer companyID = scrapeService.createCompany(companyDto, jobID);
+                                        //making 100
+                                        try {
+                                            driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[2]/div/label[3]")).click();
+                                            Thread.sleep(6000);
+                                        } catch (Exception e) {
+                                        }
+                                        int page = 0;
+                                        L1:
+                                        while (true) {
+                                            try {
+                                                driver.findElement(By.xpath("/html/body/div[6]/button")).click();
                                             } catch (Exception e) {
                                             }
-                                            contactDto.setRole(tds.get(4).getText());
-                                            if (!checkWithFilters(contactDto.getRole(), filters)) {
-                                                continue;
+                                            try {
+                                                Thread.sleep(4000);
+                                            } catch (InterruptedException e) {
+                                                e.printStackTrace();
                                             }
+                                            List<WebElement> trs = null;
+                                            try {
+                                                trs = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr"));
+                                            } catch (Exception e) {
+                                                break;
+                                            }
+                                            int index = 1;
+                                            for (WebElement tr : trs) {
+                                                if (stop) {
+                                                    break L0;
+                                                }
+                                                ContactDto contactDto = new ContactDto();
+//                                    System.out.println(tr.getText());
+                                                List<WebElement> tds = tr.findElements(By.tagName("td"));
+                                                contactDto.setName(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[2]/a/p")).getText().trim());
+                                                try {
+                                                    contactDto.setEmail(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[3]/div/div/span[2]/span")).getText().split(" ")[0]);
+                                                } catch (Exception e) {
+                                                }
+                                                contactDto.setRole(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[4]")).getText());
+                                                if (!checkWithFilters(contactDto.getRole(), filters)) {
+                                                    continue;
+                                                }
 //                                    row = sheet.createRow(rowNum++);
 //                                    row.createCell(0).setCellValue(urls.get(i));
 //                                    row.createCell(1).setCellValue(companyDto.getCompanyName());
 //                                    row.createCell(2).setCellValue(contactDto.getName());
 //                                    row.createCell(3).setCellValue(contactDto.getEmail());
 //                                    row.createCell(4).setCellValue(contactDto.getRole());
-                                            index++;
-                                            scrapeService.createContact(contactDto, companyID);
-                                            contactExtracted++;
-                                            companyDto.addContact(contactDto);
+                                                index++;
+                                                scrapeService.createContact(contactDto, companyID);
+                                                contactExtracted++;
+                                                companyDto.addContact(contactDto);
 
-                                            System.out.println(contactDto);
-                                        }
-
-                                        try {
-                                            driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-                                            Actions actions = new Actions(driver);
-
-                                            List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div[1]/div[2]/div/div[1]/ul/li"));
-                                            for (WebElement element : nextMightBe) {
-                                                if (element.getText().toLowerCase().contains("next")) {
-                                                    actions.moveToElement(element).click().perform();
-                                                    System.out.println(url + ": page" + (++page));
-                                                    Thread.sleep(6000);
-                                                    continue L1;
-                                                }
+                                                System.out.println(contactDto);
                                             }
-                                            break L1;
 
-                                        } catch (Exception e) {
-//                                    e.printStackTrace();
-                                            break;
+                                            try {
+                                                driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+                                                Actions actions = new Actions(driver);
+
+                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[1]/ul/li"));
+                                                for (WebElement element : nextMightBe) {
+                                                    if (element.getText().toLowerCase().contains("next")) {
+                                                        actions.moveToElement(element).click().perform();
+                                                        System.out.println(url + ": page" + (++page));
+                                                        Thread.sleep(6000);
+                                                        continue L1;
+                                                    }
+                                                }
+                                                break L1;
+
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                                break;
+                                            }
                                         }
-                                    }
 //                            fl.delete();
 //                            workbook.write(fileOut);
-                                    companyDtoList.add(companyDto);
+                                        companyDtoList.add(companyDto);
+                                    }
+                                } catch (Exception r) {
+                                    r.printStackTrace();
+                                    continue;
                                 }
                             }
                         }
@@ -218,10 +235,10 @@ public class Crawler {
                             companyDto.setUrlSearched(url);
 
                             Integer companyID = scrapeService.createCompany(companyDto, jobID);
-                            int count=0;
+                            int count = 0;
                             L1:
                             while (true) {
-                                if(stop){
+                                if (stop) {
                                     break L1;
                                 }
                                 trs = driver.findElements(By.tagName("tr"));
@@ -235,7 +252,7 @@ public class Crawler {
                                     contactDto.setEmail(tr.getText());
                                     companyDto.addContact(contactDto);
                                     count++;
-                                    if(count>=100)break L1;
+                                    if (count >= 100) break L1;
 
                                     scrapeService.createContact(contactDto, companyID);
                                 }
@@ -243,9 +260,9 @@ public class Crawler {
                                     driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
                                     Actions actions = new Actions(driver);
 
-                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div[3]/div/div[1]/ul/li"));
+                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[4]/div[3]/div/div[1]/ul/li"));
                                     for (WebElement element : nextMightBe) {
-                                        if(stop){
+                                        if (stop) {
                                             break L1;
                                         }
                                         if (element.getText().toLowerCase().contains("next")) {
@@ -268,29 +285,47 @@ public class Crawler {
                         scrapeService.saveCurrentStatus(url, jobID);
                     }
                     runCount.decrementAndGet();
-                    if (!jobCompletionMarked && !stop && runCount.get()==0) {
+                    if (!jobCompletionMarked && !stop && runCount.get() == 0) {
                         scrapeService.markJobCompleted(jobID);
                         jobCompletionMarked = true;
-                    }else if(stop){
+                    } else if (stop) {
                         scrapeService.markJobStopped(jobID);
                     }
-                    stop=false;
+                    stop = false;
                     driver.close();
-                }catch (Exception e){
-                    driver.close();
-                }finally {
-                    stop=false;
-                    CrawlerService.working=false;
+                }catch (WebDriverException rt){
+                    try {
+                        System.out.println("error occurred");
+                        System.out.println(url);
+                        Thread.sleep(10000);
+                        urls.add(url);
+                        run();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } catch (Exception e) {
+                    System.out.println("exception happned");
+                    System.out.println(url);
+                    e.printStackTrace();
+                    try {
+                        driver.close();
+                    }catch (WebDriverException r){
+                        r.printStackTrace();
+                    }
+                } finally {
+                    stop = false;
+                    CrawlerService.working = false;
                 }
-                if(getLinkItemSize(urls)==0){
+                if (getLinkItemSize(urls) == 0) {
                     scrapeService.markJobCompleted(jobID);
                     jobCompletionMarked = true;
                 }
             }
         };
 
-        int num = urls.size() < 3? urls.size() : 3;
-        runCount.set(num);;
+        int num = urls.size() < 3 ? urls.size() : 3;
+        runCount.set(num);
+        ;
         for (int i = 0; i < num; i++) {
             new Thread(r).start();
         }
