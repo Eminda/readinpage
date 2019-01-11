@@ -70,6 +70,7 @@ public class Crawler {
                 FirefoxDriver driver = new FirefoxDriver(options);
                 driver.get("https://app.snov.io/login");
                 String url = null;
+                int i = 0;
                 try {
                     driver.findElement(By.xpath("//*[@id=\"email\"]")).sendKeys(jobDto.getEmail());
                     driver.findElement(By.xpath("//*[@id=\"password\"]")).sendKeys(jobDto.getPassword());
@@ -95,15 +96,27 @@ public class Crawler {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        WebElement span = driver.findElementByXPath("/html/body/div[4]/div[2]/p[1]/span[2]");
-
-                        List<WebElement> aTagList = span.findElements(By.tagName("a"));
+                        WebElement span = null;
                         List<String> paths = new ArrayList<>();
+//                        try { //geting company links
+//                            span = driver.findElementByXPath("/html/body/div[2]/div/div[2]/div");
+//                        } catch (Exception e) {
+//                            i = 1;
+//                        }
+                        try {
+                            //company name list retrival
+                            span = driver.findElementByXPath("/html/body/div[2]/div/div[2]/div");
 
-                        for (WebElement element : aTagList) {
-                            paths.add(element.getAttribute("href"));
+                            List<WebElement> aTagList = span.findElements(By.tagName("a"));
+
+
+                            for (WebElement element : aTagList) {
+                                //company url list taking
+                                paths.add(element.getAttribute("href"));
+                            }
+                        } catch (Exception e) {
+
                         }
-
                         Row row;
                         int contactExtracted = 0;
                         if (paths.size() > 0) {
@@ -113,23 +126,26 @@ public class Crawler {
                                     break L0;
                                 }
                                 try {
-                                    Thread.sleep(1000);
+                                    Thread.sleep(3000);
                                 } catch (InterruptedException e) {
                                     e.printStackTrace();
                                 }
                                 CompanyDto companyDto;
                                 try {
-                                    if (driver.findElement(By.xpath("/html/body/div[3]/div/div/ul/li[1]/a")).getText().contains("Personal Contacts")) {
+                                    //Personal Contact Check
+                                    if (driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/ul/li[1]/a")).getText().contains("Personal Contacts")) {
                                         String companyName = "";
                                         try {
-                                            companyName = driver.findElement(By.xpath("/html/body/div[3]/div/div/div[1]/div/div/div[1]/div/div[2]/h1")).getText().replace("Company", "");
+                                            companyName = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[1]/div/div/div[1]/div/div[2]/h1")).getText().replace("Company", "");
                                         } catch (Exception n) {
                                             try {
+                                                //if top is 2 , if top is 3 make this 2
                                                 companyName = driver.findElement(By.xpath("/html/body/div[3]/div/div/div[1]/div/div/div[1]/div/div/h1")).getText().replace("Company", "");
                                             } catch (Exception e) {
 
                                             }
                                         }
+                                        companyName+="\n";
                                         companyDto = new CompanyDto();
 
                                         companyDto.setCompanyName(companyName.split("\n")[1]);
@@ -137,7 +153,8 @@ public class Crawler {
                                         Integer companyID = scrapeService.createCompany(companyDto, jobID);
                                         //making 100
                                         try {
-                                            driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[2]/div/label[3]")).click();
+                                            driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[21]/div[2]/label[3]/span")).click();
+//                                            driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[21]/div[2]/label[3]/span")).click();
                                             Thread.sleep(6000);
                                         } catch (Exception e) {
                                         }
@@ -145,7 +162,9 @@ public class Crawler {
                                         L1:
                                         while (true) {
                                             try {
-                                                driver.findElement(By.xpath("/html/body/div[6]/button")).click();
+                                                //cookie accept button xpath
+                                                driver.findElement(By.xpath("/html/body/div[5]/button")).click();
+//                                                driver.findElement(By.xpath("/html/body/div[6]/button")).click();
                                             } catch (Exception e) {
                                             }
                                             try {
@@ -155,7 +174,12 @@ public class Crawler {
                                             }
                                             List<WebElement> trs = null;
                                             try {
-                                                trs = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr"));
+                                                //get table rows
+                                                trs = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div"));
+//                                                trs = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr"));
+                                                trs.remove(0);
+                                                trs.remove(trs.size()-1);
+                                                trs.remove(trs.size()-1);
                                             } catch (Exception e) {
                                                 break;
                                             }
@@ -165,14 +189,19 @@ public class Crawler {
                                                     break L0;
                                                 }
                                                 ContactDto contactDto = new ContactDto();
-//                                    System.out.println(tr.getText());
+//                                                System.out.println(tr.getAttribute("innerHTML"));
+//                                    System.out.println(tr.getText());/html/body/div[2]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[3]/td[2]/a/p
                                                 List<WebElement> tds = tr.findElements(By.tagName("td"));
-                                                contactDto.setName(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[2]/a/p")).getText().trim());
+                                                contactDto.setName(tr.findElement(By.xpath("./div[2]/span[2]/span/a")).getText().trim());
+//                                                contactDto.setName(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[2]/a/p")).getText().trim());
                                                 try {
-                                                    contactDto.setEmail(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[3]/div/div/span[2]/span")).getText().split(" ")[0]);
+                                                    //get first email only
+                                                    contactDto.setEmail(tr.findElement(By.xpath("./div[3]/span[2]/div")).getText().split(" ")[0]);
+//                                                    contactDto.setEmail(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[3]/div/div/span[2]/span")).getText().split(" ")[0]);
                                                 } catch (Exception e) {
                                                 }
-                                                contactDto.setRole(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[4]")).getText());
+                                                contactDto.setRole(tr.findElement(By.xpath("./div[4]")).getText());
+//                                                contactDto.setRole(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[4]")).getText());
                                                 if (!checkWithFilters(contactDto.getRole(), filters)) {
                                                     continue;
                                                 }
@@ -191,12 +220,14 @@ public class Crawler {
                                             }
 
                                             try {
+                                                //scroll down to click next button
                                                 driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
                                                 Actions actions = new Actions(driver);
 
-                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[1]/ul/li"));
+                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[101]/div[1]/a"));
+//                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[1]/ul/li"));
                                                 for (WebElement element : nextMightBe) {
-                                                    if (element.getText().toLowerCase().contains("next")) {
+                                                    if (element.getAttribute("class").toLowerCase().contains("arrow")) {
                                                         actions.moveToElement(element).click().perform();
                                                         System.out.println(url + ": page" + (++page));
                                                         Thread.sleep(6000);
@@ -260,7 +291,8 @@ public class Crawler {
                                     driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
                                     Actions actions = new Actions(driver);
 
-                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[4]/div[3]/div/div[1]/ul/li"));
+                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div["+(2+i)+"]/div[3]/div/div[1]/ul/li"));
+//                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[4]/div[3]/div/div[1]/ul/li"));
                                     for (WebElement element : nextMightBe) {
                                         if (stop) {
                                             break L1;
@@ -293,8 +325,9 @@ public class Crawler {
                     }
                     stop = false;
                     driver.close();
-                }catch (WebDriverException rt){
+                } catch (WebDriverException rt) {
                     try {
+                        rt.printStackTrace();
                         System.out.println("error occurred");
                         System.out.println(url);
                         Thread.sleep(10000);
@@ -309,7 +342,7 @@ public class Crawler {
                     e.printStackTrace();
                     try {
                         driver.close();
-                    }catch (WebDriverException r){
+                    } catch (WebDriverException r) {
                         r.printStackTrace();
                     }
                 } finally {
