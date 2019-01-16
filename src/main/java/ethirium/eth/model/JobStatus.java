@@ -65,7 +65,7 @@ public class JobStatus implements Serializable{
         this.description=jobDto.getDescription();
         this.status=Status.INPROGRESS;
         this.totalDomainCount=domainCount;
-        this.domainList=jobDto.getUrlList();
+//        this.domainList=jobDto.getUrlList();
         this.filterList=jobDto.getFilterList();
         this.completedDomainCount=0;
     }
@@ -78,7 +78,7 @@ public class JobStatus implements Serializable{
         jobStatusDto.setDescription(this.description);
         jobStatusDto.setStatus(this.status);
         jobStatusDto.setXlsLink(this.xlsLink);
-        jobStatusDto.setDomainList(this.domainList);
+//        jobStatusDto.setDomainList(this.domainList);
         jobStatusDto.setFilterList(this.filterList);
         jobStatusDto.setTotalDomains(this.totalDomainCount);
         jobStatusDto.setCompletedDomains(this.completedDomainCount);

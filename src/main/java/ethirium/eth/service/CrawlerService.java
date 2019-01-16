@@ -27,18 +27,18 @@ public class CrawlerService {
     @Value("${xls.path}")
     private String xlsPath;
 
-    private static int count=0;
+    private static int count = 0;
 
-    public static boolean working=false;
-    private static Object lock=new Object();
+    public static boolean working = false;
+    private static Object lock = new Object();
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Integer saveAndStartJob(JobDto jobDto) {
-        if(!working) {
+        if (!working) {
             synchronized (lock) {
-                if(!working) {
-                    working=true;
-                    Crawler.stop=false;
+                if (!working) {
+                    working = true;
+                    Crawler.stop = false;
                     String urls[] = jobDto.getUrlList().split(",");
                     List<String> urlList = new ArrayList<>();
                     StringBuffer formattedUrlList = new StringBuffer("");
@@ -50,7 +50,7 @@ public class CrawlerService {
                         }
                     }
                     if (formattedUrlList.length() > 0) {
-                        jobDto.setUrlList(formattedUrlList.toString().substring(0, formattedUrlList.length() - 1));
+//                        jobDto.setUrlList(formattedUrlList.toString().substring(0, formattedUrlList.length() - 1));
                     }
 
                     String filters[] = jobDto.getFilterList().split(",");
@@ -78,12 +78,36 @@ public class CrawlerService {
                     Runnable r = new Runnable() {
                         @Override
                         public void run() {
-                            try {
-                                crawler.scrape(jobDto, urlList, filterList, jobStatus.getJobStatusID(), jobDto.isRetrieveEmailOnly());
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                                working = false;
-                                scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                            int i = 0;
+                            while (true) {
+                                try {
+                                    int end=i+100;
+                                    if(end>urlList.size()){
+                                        end=urlList.size();
+                                    }
+                                    crawler.scrape(jobDto, urlList.subList(i, end), filterList, jobStatus.getJobStatusID(), jobDto.isRetrieveEmailOnly());
+                                    if(end==urlList.size()){
+                                        scrapeService.markJobCompleted(jobStatus.getJobStatusID());
+                                        break;
+                                    }
+                                    i += 100;
+
+                                } catch (IndexOutOfBoundsException e) {
+                                    working = false;
+                                    e.printStackTrace();
+                                    scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    working = false;
+                                    scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                                }
+                                while (!Crawler.jobCompletionMarked) {
+                                    try {
+                                        Thread.sleep(30000);
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
+                                }
                             }
                         }
                     };
@@ -93,16 +117,16 @@ public class CrawlerService {
                     new Thread(r).start();
 
                     return jobStatus.getJobStatusID();
-                }else {
+                } else {
                     return -1;
                 }
             }
-        }else{
+        } else {
             return -1;
         }
     }
 
-    public void stopJob(){
-        Crawler.stop=true;
+    public void stopJob() {
+        Crawler.stop = true;
     }
 }

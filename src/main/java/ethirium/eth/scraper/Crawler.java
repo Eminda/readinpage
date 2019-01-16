@@ -52,7 +52,7 @@ public class Crawler {
         return urls.size();
     }
 
-    private boolean jobCompletionMarked = false;
+    public static  boolean jobCompletionMarked = false;
 
     public static boolean stop = false;
 
@@ -105,7 +105,7 @@ public class Crawler {
 //                        }
                         try {
                             //company name list retrival
-                            span = driver.findElementByXPath("/html/body/div[2]/div/div[2]/div");
+                            span = driver.findElementByXPath("/html/body/div[2]/div/div[2]");
 
                             List<WebElement> aTagList = span.findElements(By.tagName("a"));
 
@@ -140,7 +140,7 @@ public class Crawler {
                                         } catch (Exception n) {
                                             try {
                                                 //if top is 2 , if top is 3 make this 2
-                                                companyName = driver.findElement(By.xpath("/html/body/div[3]/div/div/div[1]/div/div/div[1]/div/div/h1")).getText().replace("Company", "");
+                                                companyName = driver.findElement(By.xpath("/html/body/div[2]/div/div/div[1]/div/div/div[1]/div/div/h1")).getText().replace("Company", "");
                                             } catch (Exception e) {
 
                                             }
@@ -174,7 +174,7 @@ public class Crawler {
                                             }
                                             List<WebElement> trs = null;
                                             try {
-                                                //get table rows
+                                                //get table rows/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[2]
                                                 trs = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div"));
 //                                                trs = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr"));
                                                 trs.remove(0);
@@ -287,29 +287,30 @@ public class Crawler {
 
                                     scrapeService.createContact(contactDto, companyID);
                                 }
-                                try {
-                                    driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-                                    Actions actions = new Actions(driver);
-
-                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div["+(2+i)+"]/div[3]/div/div[1]/ul/li"));
-//                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[4]/div[3]/div/div[1]/ul/li"));
-                                    for (WebElement element : nextMightBe) {
-                                        if (stop) {
-                                            break L1;
-                                        }
-                                        if (element.getText().toLowerCase().contains("next")) {
-                                            actions.moveToElement(element).click().perform();
-//                                System.out.println(urls.get(i) + ": page" + (++page));
-                                            Thread.sleep(6000);
-                                            continue L1;
-                                        }
-                                    }
-                                    break L1;
-
-                                } catch (Exception e) {
-//                                    e.printStackTrace();
-                                    break;
-                                }
+                                break ;
+//                                try {
+//                                    driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+//                                    Actions actions = new Actions(driver);
+//
+//                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div["+(2+i)+"]/div[3]/div/div[1]/ul/li"));
+////                                    List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[4]/div[3]/div/div[1]/ul/li"));
+//                                    for (WebElement element : nextMightBe) {
+//                                        if (stop) {
+//                                            break L1;
+//                                        }
+//                                        if (element.getText().toLowerCase().contains("next")) {
+//                                            actions.moveToElement(element).click().perform();
+////                                System.out.println(urls.get(i) + ": page" + (++page));
+//                                            Thread.sleep(6000);
+//                                            continue L1;
+//                                        }
+//                                    }
+//                                    break L1;
+//
+//                                } catch (Exception e) {
+////                                    e.printStackTrace();
+//                                    break;
+//                                }
 
                             }
                         }
@@ -318,7 +319,7 @@ public class Crawler {
                     }
                     runCount.decrementAndGet();
                     if (!jobCompletionMarked && !stop && runCount.get() == 0) {
-                        scrapeService.markJobCompleted(jobID);
+//                        scrapeService.markJobCompleted(jobID);
                         jobCompletionMarked = true;
                     } else if (stop) {
                         scrapeService.markJobStopped(jobID);
@@ -331,7 +332,7 @@ public class Crawler {
                         System.out.println("error occurred");
                         System.out.println(url);
                         Thread.sleep(10000);
-                        urls.add(url);
+//                        urls.add(url);
                         run();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -350,7 +351,7 @@ public class Crawler {
                     CrawlerService.working = false;
                 }
                 if (getLinkItemSize(urls) == 0) {
-                    scrapeService.markJobCompleted(jobID);
+//                    scrapeService.markJobCompleted(jobID);
                     jobCompletionMarked = true;
                 }
             }

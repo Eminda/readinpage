@@ -43,7 +43,7 @@ export class ListOrderComponent implements OnInit {
     }
 
     getShortList(list) {
-        if (list.length > 20) {
+        if (list!=null && list.length > 20) {
             return list.substring(0, 20) + "...";
         }
         return list;
