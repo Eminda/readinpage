@@ -218,28 +218,29 @@ public class Crawler {
 
                                                 System.out.println(contactDto);
                                             }
+                                            break;
 
-                                            try {
-                                                //scroll down to click next button
-                                                driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
-                                                Actions actions = new Actions(driver);
-
-                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[101]/div[1]/a"));
-//                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[1]/ul/li"));
-                                                for (WebElement element : nextMightBe) {
-                                                    if (element.getAttribute("class").toLowerCase().contains("arrow")) {
-                                                        actions.moveToElement(element).click().perform();
-                                                        System.out.println(url + ": page" + (++page));
-                                                        Thread.sleep(6000);
-                                                        continue L1;
-                                                    }
-                                                }
-                                                break L1;
-
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                                break;
-                                            }
+//                                            try {
+//                                                //scroll down to click next button
+//                                                driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
+//                                                Actions actions = new Actions(driver);
+//
+//                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[101]/div[1]/a"));
+////                                                List<WebElement> nextMightBe = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[2]/div/div[1]/ul/li"));
+//                                                for (WebElement element : nextMightBe) {
+//                                                    if (element.getAttribute("class").toLowerCase().contains("arrow")) {
+//                                                        actions.moveToElement(element).click().perform();
+//                                                        System.out.println(url + ": page" + (++page));
+//                                                        Thread.sleep(6000);
+//                                                        continue L1;
+//                                                    }
+//                                                }
+//                                                break L1;
+//
+//                                            } catch (Exception e) {
+//                                                e.printStackTrace();
+//                                                break;
+//                                            }
                                         }
 //                            fl.delete();
 //                            workbook.write(fileOut);
