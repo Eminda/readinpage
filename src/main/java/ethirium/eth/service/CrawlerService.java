@@ -80,26 +80,28 @@ public class CrawlerService {
                         public void run() {
                             int i = 0;
                             while (true) {
+                                int end = i + 100;
                                 try {
-                                    int end=i+100;
-                                    if(end>urlList.size()){
-                                        end=urlList.size();
+
+                                    if (end > urlList.size()) {
+                                        end = urlList.size();
                                     }
                                     crawler.scrape(jobDto, urlList.subList(i, end), filterList, jobStatus.getJobStatusID(), jobDto.isRetrieveEmailOnly());
-                                    if(end==urlList.size()){
-                                        scrapeService.markJobCompleted(jobStatus.getJobStatusID());
-                                        break;
-                                    }
-                                    i += 100;
 
+
+                                } catch (IllegalArgumentException er) {
+                                    scrapeService.markJobCompleted(jobStatus.getJobStatusID());
+                                    break;
                                 } catch (IndexOutOfBoundsException e) {
                                     working = false;
                                     e.printStackTrace();
                                     scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                                    break;
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                     working = false;
                                     scrapeService.markJobFailed(jobStatus.getJobStatusID());
+                                    break;
                                 }
                                 while (!Crawler.jobCompletionMarked) {
                                     try {
@@ -108,6 +110,11 @@ public class CrawlerService {
                                         e.printStackTrace();
                                     }
                                 }
+                                if (end == urlList.size()) {
+                                    scrapeService.markJobCompleted(jobStatus.getJobStatusID());
+                                    break;
+                                }
+                                i += 100;
                             }
                         }
                     };
