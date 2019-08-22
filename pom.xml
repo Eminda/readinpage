@@ -105,13 +105,9 @@
 		</dependency>
 
 		<dependency>
-
 			<groupId>com.google.guava</groupId>
-
 			<artifactId>guava</artifactId>
-
 			<version>24.1-jre</version>
-
 		</dependency>
 		<dependency>
 			<groupId>org.apache.poi</groupId>
@@ -133,8 +129,6 @@
 			<artifactId>jsr105-api</artifactId>
 			<version>1.0.1</version>
 		</dependency>
-
-
 	</dependencies>
 
 	<build>

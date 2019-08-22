@@ -1,3 +1,3 @@
-export class SETTING{
-    public static HTTP='http://165.22.40.2:8080';
+export class SETTING {
+    public static HTTP = 'http://167.71.251.166:8080';
 }
