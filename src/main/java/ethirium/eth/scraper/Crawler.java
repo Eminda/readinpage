@@ -52,7 +52,7 @@ public class Crawler {
         return urls.size();
     }
 
-    public static  boolean jobCompletionMarked = false;
+    public static boolean jobCompletionMarked = false;
 
     public static boolean stop = false;
 
@@ -66,7 +66,7 @@ public class Crawler {
             @Override
             public void run() {
                 FirefoxOptions options = new FirefoxOptions();
-                options.setHeadless(true);
+                options.setHeadless(false);
                 FirefoxDriver driver = new FirefoxDriver(options);
                 driver.get("https://app.snov.io/login");
                 String url = null;
@@ -105,17 +105,16 @@ public class Crawler {
 //                        }
                         try {
                             //company name list retrival
-                            span = driver.findElementByXPath("/html/body/div[2]/div/div[2]");
+                            span = driver.findElementByCssSelector("#domain-search").findElement(By.xpath("./div/div[2]"));
 
-                            List<WebElement> aTagList = span.findElements(By.tagName("a"));
+                            List<WebElement> divs = span.findElements(By.tagName("div"));
 
-
-                            for (WebElement element : aTagList) {
-                                //company url list taking
-                                paths.add(element.getAttribute("href"));
+                            for (WebElement div : divs) {
+                                paths.add(div.findElement(By.tagName("a")).getAttribute("href"));
                             }
-                        } catch (Exception e) {
 
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
                         Row row;
                         int contactExtracted = 0;
@@ -145,7 +144,7 @@ public class Crawler {
 
                                             }
                                         }
-                                        companyName+="\n";
+                                        companyName += "\n";
                                         companyDto = new CompanyDto();
 
                                         companyDto.setCompanyName(companyName.split("\n")[1]);
@@ -153,7 +152,7 @@ public class Crawler {
                                         Integer companyID = scrapeService.createCompany(companyDto, jobID);
                                         //making 100
                                         try {
-                                            driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[21]/div[2]/label[3]/span")).click();
+                                            driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div[2]/div[2]/label[3]/span")).click();
 //                                            driver.findElement(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[21]/div[2]/label[3]/span")).click();
                                             Thread.sleep(6000);
                                         } catch (Exception e) {
@@ -168,18 +167,19 @@ public class Crawler {
                                             } catch (Exception e) {
                                             }
                                             try {
-                                                Thread.sleep(4000);
+                                                Thread.sleep(6000);
                                             } catch (InterruptedException e) {
                                                 e.printStackTrace();
                                             }
                                             List<WebElement> trs = null;
                                             try {
                                                 //get table rows/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div[2]
-                                                trs = driver.findElements(By.xpath("/html/body/div[2]/div/div/div[2]/div/div/div[4]/div/div/div"));
+
+                                                trs = driver.findElement(By.cssSelector(".columns_4")).findElements(By.cssSelector("div.table-flex__row"));
 //                                                trs = driver.findElements(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr"));
                                                 trs.remove(0);
-                                                trs.remove(trs.size()-1);
-                                                trs.remove(trs.size()-1);
+//                                                trs.remove(trs.size()-1);
+//                                                trs.remove(trs.size()-1);
                                             } catch (Exception e) {
                                                 break;
                                             }
@@ -191,8 +191,13 @@ public class Crawler {
                                                 ContactDto contactDto = new ContactDto();
 //                                                System.out.println(tr.getAttribute("innerHTML"));
 //                                    System.out.println(tr.getText());/html/body/div[2]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[3]/td[2]/a/p
-                                                List<WebElement> tds = tr.findElements(By.tagName("td"));
-                                                contactDto.setName(tr.findElement(By.xpath("./div[2]/span[2]/span/a")).getText().trim());
+                                                List<WebElement> tds = tr.findElements(By.xpath("./div"));
+
+                                                try {
+                                                    contactDto.setName(tr.findElement(By.xpath("./div[2]/span[2]/span/a")).getText().trim());
+                                                } catch (Exception d) {
+                                                    System.out.println();
+                                                }
 //                                                contactDto.setName(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[2]/a/p")).getText().trim());
                                                 try {
                                                     //get first email only
@@ -200,7 +205,11 @@ public class Crawler {
 //                                                    contactDto.setEmail(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[3]/div/div/span[2]/span")).getText().split(" ")[0]);
                                                 } catch (Exception e) {
                                                 }
-                                                contactDto.setRole(tr.findElement(By.xpath("./div[4]")).getText());
+                                                try {
+                                                    contactDto.setRole(tr.findElement(By.xpath("./div[4]")).getText());
+                                                } catch (Exception f) {
+                                                    System.out.println();
+                                                }
 //                                                contactDto.setRole(driver.findElement(By.xpath("/html/body/div[3]/div/div/div[2]/div[1]/div[1]/table/tbody/tr[" + index + "]/td[4]")).getText());
                                                 if (!checkWithFilters(contactDto.getRole(), filters)) {
                                                     continue;
@@ -288,7 +297,7 @@ public class Crawler {
 
                                     scrapeService.createContact(contactDto, companyID);
                                 }
-                                break ;
+                                break;
 //                                try {
 //                                    driver.executeScript("window.scrollTo(0, document.body.scrollHeight);");
 //                                    Actions actions = new Actions(driver);
