@@ -59,7 +59,8 @@ public class Crawler {
     public static AtomicInteger runCount = new AtomicInteger(-1);
 
     public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID, boolean getEmailOnly) throws InterruptedException, IOException {
-        System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
+//        System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
+        System.setProperty("webdriver.gecko.driver", "./geckodriver");
 
         jobCompletionMarked = false;
         Runnable r = new Runnable() {
