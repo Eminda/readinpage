@@ -59,15 +59,16 @@ public class Crawler {
     public static AtomicInteger runCount = new AtomicInteger(-1);
 
     public void scrape(JobDto jobDto, List<String> urls, List<String> filters, Integer jobID, boolean getEmailOnly) throws InterruptedException, IOException {
-//        System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
-        System.setProperty("webdriver.gecko.driver", "./geckodriver");
-
+        System.setProperty("webdriver.gecko.driver", "/var/lib/tomcat8/geckodriver");
+//        System.setProperty("webdriver.gecko.driver", "./geckodriver");
+        System.setProperty(FirefoxDriver.SystemProperty.DRIVER_USE_MARIONETTE, "true");
+        System.setProperty(FirefoxDriver.SystemProperty.BROWSER_LOGFILE, "/dev/null");
         jobCompletionMarked = false;
         Runnable r = new Runnable() {
             @Override
             public void run() {
                 FirefoxOptions options = new FirefoxOptions();
-                options.setHeadless(false);
+                options.setHeadless(true);
                 FirefoxDriver driver = new FirefoxDriver(options);
                 driver.get("https://app.snov.io/login");
                 String url = null;
